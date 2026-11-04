@@ -1,0 +1,17 @@
+# arquivos compilados (o javac gera de novo)
+bin/
+out/
+*.class
+
+# backups que o JFlex cria quando gera o Lexer.java de novo
+*.java~
+
+# configurações de editor
+.vscode/
+.idea/
+*.iml
+
+# lixo do sistema
+.DS_Store
+Thumbs.db
+desktop.ini
