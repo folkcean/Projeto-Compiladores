@@ -1,0 +1,7 @@
+<program>       ::= <s-expr> <program> | ε
+<s-expr>        ::= <atom> | <list>
+<list>          ::= "(" <list-rest>
+<list-rest>     ::= <elements> ")" | ")"
+<elements>      ::= <s-expr> <elements-rest>
+<elements-rest> ::= <elements> | ε
+<atom>          ::= NUMBER | SYMBOL | STRING | BOOLEAN
