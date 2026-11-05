@@ -1,0 +1,6 @@
+<s-expr> ::= <atom> | <list>
+<list> ::= "(" <elements> ")" | "(" ")"
+<elements> ::= <s-expr> <elements> | <s-expr>
+<atom> ::= NUMBER | SYMBOL | STRING | BOOLEAN
+
+
