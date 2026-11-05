@@ -20,7 +20,7 @@ import java.util.Arrays;
 public class RodarTestes {
 
     public static void main(String[] args) throws IOException {
-        File[] arquivos = new File("testes").listFiles((d, nome) -> nome.endsWith(".lisp"));
+        File[] arquivos = new File("etapa2-descendente/testes").listFiles((d, nome) -> nome.endsWith(".lisp"));
         if (arquivos == null || arquivos.length == 0) {
             System.out.println("Nenhum teste encontrado. Rode a partir da pasta da etapa (etapa2-descendente).");
             System.exit(1);

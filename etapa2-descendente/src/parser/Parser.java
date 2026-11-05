@@ -6,6 +6,17 @@ import lexer.TokenType;
 
 import java.io.IOException;
 
+/*
+ * Gramática (LL(1), sem while: repetição só por recursão):
+ *
+ * <program>       ::= <s-expr> <program> | ε                  P
+ * <s-expr>        ::= <atom> | <list>                         S
+ * <list>          ::= "(" <list-rest>                         L
+ * <list-rest>     ::= <elements> ")" | ")"                    L'
+ * <elements>      ::= <s-expr> <elements-rest>                E
+ * <elements-rest> ::= <elements> | ε                          E'
+ * <atom>          ::= NUMBER | SYMBOL | STRING | BOOLEAN      A
+ */
 public class Parser {
     private final Lexer lexer;
     private int profundidade = 0;
@@ -14,7 +25,6 @@ public class Parser {
     public Parser(Lexer lexer) throws IOException {
         this.lexer = lexer;
         avancar();
-
     }
 
     private void avancar() throws IOException {
@@ -39,52 +49,88 @@ public class Parser {
                 || tipo == TokenType.BOOLEAN;
     }
 
+    // FIRST(<s-expr>) = { "(", NUMBER, SYMBOL, STRING, BOOLEAN }
     private boolean startsSExpr() {
         return atual.getType() == TokenType.LPAREN || isAtom();
     }
 
+    // Ponto de entrada: o EOF fica fora da gramática, então é checado uma única vez aqui
     public void parseProgram() throws IOException {
+        P();
+        comparar(TokenType.EOF);
+    }
+
+    // <program> ::= <s-expr> <program> | ε
+    private void P() throws IOException {
         imprime("P");
         profundidade++;
-        while (startsSExpr()) {
-            parseSExpr();
+        if (startsSExpr()) {
+            S();
+            P();
+        } else {
+            imprime("ε");
         }
-        comparar(TokenType.EOF);
         profundidade--;
     }
 
-    private void parseSExpr() throws IOException {
+    // <s-expr> ::= <atom> | <list>
+    private void S() throws IOException {
         imprime("S");
         profundidade++;
-        if (atual.getType() == TokenType.LPAREN) {
-            parseList();
-        } else if (isAtom()) {
-            parseAtom();
+        if (isAtom()) {
+            A();
+        } else if (atual.getType() == TokenType.LPAREN) {
+            L();
         } else {
             throw new SyntaxException("uma expressão", atual);
         }
         profundidade--;
     }
 
-    private void parseList() throws IOException {
+    // <list> ::= "(" <list-rest>
+    private void L() throws IOException {
         imprime("L");
         profundidade++;
         imprime(comparar(TokenType.LPAREN).toString());
-        parseItems();
+        Llinha();
+        profundidade--;
+    }
+
+    // <list-rest> ::= <elements> ")" | ")"
+    // As duas alternativas terminam em ")", então só o <elements> é opcional
+    private void Llinha() throws IOException {
+        imprime("L'");
+        profundidade++;
+        if (startsSExpr()) {
+            E();
+        }
         imprime(comparar(TokenType.RPAREN).toString());
         profundidade--;
     }
 
-    private void parseItems() throws IOException {
-        imprime("I");
+    // <elements> ::= <s-expr> <elements-rest>
+    private void E() throws IOException {
+        imprime("E");
         profundidade++;
-        while (startsSExpr()) {
-            parseSExpr();
+        S();
+        Elinha();
+        profundidade--;
+    }
+
+    // <elements-rest> ::= <elements> | ε
+    private void Elinha() throws IOException {
+        imprime("E'");
+        profundidade++;
+        if (startsSExpr()) {
+            E();
+        } else {
+            imprime("ε");
         }
         profundidade--;
     }
 
-    private void parseAtom() throws IOException {
+    // <atom> ::= NUMBER | SYMBOL | STRING | BOOLEAN
+    private void A() throws IOException {
         imprime("A");
         profundidade++;
         imprime(comparar(atual.getType()).toString());
